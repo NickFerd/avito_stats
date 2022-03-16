@@ -1,4 +1,4 @@
-# avito-market_intelligence
+# avito_stats
 Тестовое задание Авито в отдел Market Intelligence
 
 __Задача__:
