@@ -1,0 +1,311 @@
+openapi: 3.1.0
+
+info:
+  title: Avito Stats API
+  description: API that allows to track amount of ads grouped by search query and region
+  version: 1.0.0
+
+servers:
+  - url: http://localhost
+    description: local server
+
+paths:
+  /add:
+    post:
+      summary: adds pair of query and region to tracking schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddScheme'
+      responses:
+        '200':
+          description: Returns id of created pair
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+        '400':
+          description: Bad request. Invalid region name.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /stop/{pair_id}:
+    parameters:
+      - in: path
+        name: pair_id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      summary: Stop tracking pair
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+
+  /stat:
+    post:
+      summary: Endpoint for getting number of ads between specified datetime_from, datetime_to
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatsSchemeRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsSchemeResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+
+  /top:
+    post:
+      summary: Endpoint similar to /stat endpoint but returns top 5 ads for every hour between specified datetime_from and datetime_to.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatsSchemeRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopResponse'
+
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  responses:
+    NotFound:
+      description: The specified pair_id was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+      additionalProperties: false
+
+    Region:
+      type: string
+      description: "Valid names for regions"
+      enum:
+        - Крым
+        - Алтайский край
+        - Амурская область
+        - Архангельская область
+        - Астраханская область
+        - Белгородская область
+        - Брянская область
+        - Бурятия
+        - Владимирская область
+        - Волгоградская область
+        - Вологодская область
+        - Воронежская область
+        - Еврейская АО
+        - Ивановская область
+        - Ингушетия
+        - Иркутская область
+        - Кабардино-Балкария
+        - Калининградская область
+        - Калмыкия
+        - Калужская область
+        - Камчатский край
+        - Карачаево-Черкесия
+        - Кемеровская область
+        - Кировская область
+        - Костромская область
+        - Краснодарский край
+        - Красноярский край
+        - Курганская область
+        - Курская область
+        - Ленинградская область
+        - Липецкая область
+        - Магаданская область
+        - Москва
+        - Московская область
+        - Мурманская область
+        - Ненецкий АО
+        - Нижегородская область
+        - Новгородская область
+        - Новосибирская область
+        - Омская область
+        - Оренбургская область
+        - Орловская область
+        - Пензенская область
+        - Пермский край
+        - Приморский край
+        - Псковская область
+        - Адыгея
+        - Башкортостан
+        - Дагестан
+        - Карелия
+        - Коми
+        - Марий Эл
+        - Мордовия
+        - Саха (Якутия)
+        - Северная Осетия
+        - Татарстан
+        - Тыва
+        - Хакасия
+        - Ростовская область
+        - Рязанская область
+        - Самарская область
+        - Санкт-Петербург
+        - Саратовская область
+        - Сахалинская область
+        - Свердловская область
+        - Смоленская область
+        - Ставропольский край
+        - Тамбовская область
+        - Тверская область
+        - Томская область
+        - Тульская область
+        - Тюменская область
+        - Удмуртия
+        - Ульяновская область
+        - Хабаровский край
+        - Ханты-Мансийский АО
+        - Челябинская область
+        - Чеченская республика
+        - Забайкальский край
+        - Чувашия
+        - Чукотский АО
+        - Ямало-Ненецкий АО
+        - Ярославская область
+        - Республика Алтай
+
+    StatItem:
+      type: object
+      properties:
+        moment:
+          type: string
+          format: date-time
+        count:
+          type: integer
+
+    AdItem:
+      type: object
+      required:
+        - id
+        - url
+        - moment
+      properties:
+        id:
+          type: integer
+        url:
+          type: string
+        moment:
+          type: string
+          format: date-time
+
+    AddScheme:
+      type: object
+      required:
+        - query
+        - region
+      properties:
+        query:
+          type: string
+        region:
+          $ref: '#/Region'
+
+    StatsSchemeRequest:
+      type: object
+      required:
+        - id
+        - datetime_from
+        - datetime_to
+      properties:
+        id:
+          type: string
+          format: uuid
+        datetime_from:
+          type: string
+          format: date-time
+        datetime_to:
+          type: string
+          format: date-time
+
+    StatsSchemeResponse:
+      type: object
+      required:
+        - query
+        - region
+        - stats
+      properties:
+        query:
+          type: string
+        region:
+          type: string
+        stats:
+          type: array
+          items:
+            $ref: '#/StatItem'
+
+    TopResponse:
+      type: object
+      properties:
+        query:
+          type: string
+        region:
+          type: string
+        top:
+          type: array
+          items:
+            $ref: '#/AdItem'
+             
+    
+         
+         
+
+
+
