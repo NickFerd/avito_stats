@@ -7,7 +7,7 @@ info:
 
 servers:
   - url: http://localhost
-    description: local server
+    description: local server for development
 
 paths:
   /add:
@@ -30,12 +30,8 @@ paths:
                   id:
                     type: string
                     format: uuid
-        '400':
-          description: Bad request. Invalid region name.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   /stop/{pair_id}:
     parameters:
@@ -62,20 +58,20 @@ paths:
 
   /stat:
     post:
-      summary: Endpoint for getting number of ads between specified datetime_from, datetime_to
+      summary: Endpoint for getting number of ads between specified datetime_from, datetime_to (all in UTC)
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StatsSchemeRequest'
+              $ref: '#/components/schemas/StatsSchemaRequest'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StatsSchemeResponse'
+                $ref: '#/components/schemas/StatsSchemaResponse'
         '404':
           $ref: '#/components/responses/NotFound'
         '400':
@@ -100,7 +96,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TopResponse'
+                $ref: '#/components/schemas/TopAdsResponse'
 
         '404':
           $ref: '#/components/responses/NotFound'
@@ -117,7 +113,6 @@ paths:
     post:
       description: Return location id and specified in request payload location name
       requestBody:
-      
         required: true
         content:
           application/json:
@@ -145,7 +140,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-   
+
+
 components:
   responses:
     NotFound:
@@ -177,11 +173,11 @@ components:
     AdItem:
       type: object
       required:
-        - id
+        - ad_id
         - url
         - moment
       properties:
-        id:
+        ad_id:
           type: integer
         url:
           type: string
@@ -193,14 +189,14 @@ components:
       type: object
       required:
         - query
-        - region
+        - location
       properties:
         query:
           type: string
         location:
           type: int
 
-    StatsSchemeRequest:
+    StatsSchemaRequest:
       type: object
       required:
         - id
@@ -217,7 +213,7 @@ components:
           type: string
           format: date-time
 
-    StatsSchemeResponse:
+    StatsSchemaResponse:
       type: object
       required:
         - query
@@ -233,7 +229,7 @@ components:
           items:
             $ref: '#/StatItem'
 
-    TopResponse:
+    TopAdsResponse:
       type: object
       properties:
         query:

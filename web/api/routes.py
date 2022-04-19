@@ -4,37 +4,33 @@ from uuid import UUID, uuid4
 
 from fastapi import APIRouter
 
-from web.api.schemas import (
-    CreatePairSchema,
-    GetPairSchema
-)
+from web.api import schemas
+
 router = APIRouter()
 
 
-@router.post('/add', response_model=GetPairSchema)
-async def add_pair(payload: CreatePairSchema):
-    """View function to add a new pair to tracking schedule
-    If pair (query, location) already exists, TODO """
-    print('adding pair')
-    return {'status': 'OK'}
+@router.post('/add', response_model=schemas.GetPairSchema)
+async def add_pair(payload: schemas.CreatePairSchema):
+    """Add a new pair to tracking schedule
+    """
+    pass
 
 
 @router.get('/stop/{pair_id}')
 async def stop_tracking_pair(pair_id: UUID):
-    print(f'Stop tracking pair: {pair_id}')
-    return {'status': 'OK'}
-
-
-@router.post('/stat')  # todo add response schema
-async def fetch_count_stats():
     pass
 
 
-@router.post('/top')  # todo add response schema
-async def fetch_top_ads():
+@router.post('/stat', response_model=schemas.StatsResponseSchema)
+async def fetch_count_stats(payload: schemas.ResultsRequestSchema):
     pass
 
 
-@router.post('/location')  # todo add request/response schema
-async def fetch_location_id():
+@router.post('/top', response_model=schemas.TopAdsResponseSchema)
+async def fetch_top_ads(payload: schemas.ResultsRequestSchema):
+    pass
+
+
+@router.post('/location', response_model=schemas.LocationResponseSchema)
+async def fetch_location_id(payload: schemas.LocationRequestSchema):
     pass
