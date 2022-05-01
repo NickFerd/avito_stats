@@ -12,7 +12,7 @@ servers:
 paths:
   /add:
     post:
-      summary: adds pair of query and region to tracking schedule
+      summary: adds pair of query and location_id to tracking schedule
       requestBody:
         required: true
         content:
@@ -29,9 +29,13 @@ paths:
                 properties:
                   id:
                     type: string
-                    format: uuid
-        '404':
-          $ref: '#/components/responses/NotFound'
+                    format: uuid  # todo update
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /stop/{pair_id}:
     parameters:
@@ -119,7 +123,7 @@ paths:
             schema:
               type: object
               properties:
-                location: string
+                location_name: string
         
       responses:
         '200':
@@ -189,12 +193,15 @@ components:
       type: object
       required:
         - query
-        - location
+        - location_id
       properties:
         query:
           type: string
-        location:
+        location_id:
           type: int
+        check_every:
+          type: int
+          default: 60
 
     StatsSchemaRequest:
       type: object
@@ -220,10 +227,9 @@ components:
         - region
         - stats
       properties:
-        query:
+        id:
           type: string
-        region:
-          type: string
+          format: uuid
         stats:
           type: array
           items:
@@ -236,7 +242,7 @@ components:
           type: string
         region:
           type: string
-        top:
+        top_ads:
           type: array
           items:
             $ref: '#/AdItem'

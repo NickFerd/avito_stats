@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    restart: always
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - REDBEAT_REDIS_URL=redis://redis:6379/1
+    ports:
+      - 8080:8080
+    command: uvicorn web.app:app --host 0.0.0.0 --port 8080
+
+  redis:  # broker and tasks result backend
+    image: redis:6
+    volumes:
+      - redis_data:/data
+
+
+  worker:  # celery based worker and beat scheduler
+    build: .
+    command: celery --app=scheduler.celery.app worker -E --loglevel=debug
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - REDBEAT_REDIS_URL=redis://redis:6379/1
+    depends_on:
+      - web
+      - redis
+
+  beat:
+    build: .
+    command: celery --app=scheduler.celery.app beat --scheduler=redbeat.RedBeatScheduler
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - REDBEAT_REDIS_URL=redis://redis:6379/1
+    depends_on:
+      - worker
+      - web
+
+  dashboard:
+    image: mher/flower
+    ports:
+      - 5555:5555
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_BROKER_API=redis://redis:6379/0  # ?? needed?
+    depends_on:
+      - web
+      - redis
+      - worker
+
+volumes:
+  redis_data:

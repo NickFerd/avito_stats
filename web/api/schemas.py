@@ -51,7 +51,7 @@ class CreatePairSchema(PairItemSchema):
 
 class ResultsRequestSchema(BaseModel):
     """Schema for getting stats of particular pair"""
-    id: UUID
+    pair_id: UUID
     datetime_from: datetime
     datetime_to: datetime
 
