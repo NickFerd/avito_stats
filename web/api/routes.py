@@ -2,8 +2,10 @@
 from random import randint
 from uuid import UUID
 
+from celery.schedules import schedule
 from fastapi import APIRouter
 from starlette.responses import JSONResponse
+from redbeat import RedBeatSchedulerEntry
 
 from web.api import schemas
 from scheduler import celery
@@ -54,8 +56,17 @@ def set_periodic_task():
     #     "task": 'scheduler.celery.simple_task',
     #     'schedule': 60,
     # }
-    key = celery.app.add_periodic_task(schedule=30,
-                                       sig=celery.simple_task.s(),
-                                       name=task_name)
-    print(celery.app.conf.beat_schedule)
+    # key = celery.app.add_periodic_task(schedule=30,
+    #                                    sig=celery.simple_task.s(),
+    #                                    name=task_name)
+    # print(celery.app.conf.beat_schedule)
+    interval = schedule(run_every=60)
+    entry = RedBeatSchedulerEntry(task_name,
+                                  'scheduler.celery.simple_task',
+                                  interval,
+                                  app=celery.app)
+    entry.save()
+    print(entry.next)
+    print(entry.name)
+    print(entry.enabled)
     return JSONResponse({"task_name": task_name})

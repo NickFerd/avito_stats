@@ -8,6 +8,8 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - REDBEAT_REDIS_URL=redis://redis:6379/1
+#    volumes:
+#      - C:\Users\Nikita\Projects\avito_stats\celerybeat-schedule:/usr/src/app/celerybeat-schedule
     ports:
       - 8080:8080
     command: uvicorn web.app:app --host 0.0.0.0 --port 8080
@@ -20,22 +22,26 @@ services:
 
   worker:  # celery based worker and beat scheduler
     build: .
-    command: celery --app=scheduler.celery.app worker -E --loglevel=debug
+    command: celery --app=scheduler.celery.app worker --loglevel=debug
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - REDBEAT_REDIS_URL=redis://redis:6379/1
+#    volumes:
+#      - C:\Users\Nikita\Projects\avito_stats\celerybeat-schedule:/usr/src/app/celerybeat-schedule
     depends_on:
       - web
       - redis
 
   beat:
     build: .
-    command: celery --app=scheduler.celery.app beat --scheduler=redbeat.RedBeatScheduler
+    command: celery --app=scheduler.celery.app beat --max-interval=60 --loglevel=debug --scheduler=redbeat.RedBeatScheduler
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - REDBEAT_REDIS_URL=redis://redis:6379/1
+#    volumes:
+#      - C:\Users\Nikita\Projects\avito_stats\celerybeat-schedule:/usr/src/app/celerybeat-schedule
     depends_on:
       - worker
       - web

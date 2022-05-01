@@ -17,10 +17,10 @@ app.conf.update({
                                         "redis://localhost:6379/1")
 })
 
+
 # @app.on_after_configure.connect
 # def setup_periodic_tasks(sender, **kwargs):
 #     sender.add_periodic_task(30, simple_task.s(), name='simple task')
-
 
 @app.task
 def simple_task():
