@@ -13,13 +13,18 @@ router = APIRouter()
 
 @router.post('/add', response_model=schemas.GetPairSchema)
 def add_pair(payload: schemas.CreatePairSchema,
-             service: StatsService = Depends(deps.init_service)):
+             service: StatsService = Depends(deps.init_service),
+             valid_locations: dict = Depends(deps.valid_locations)):
     """Add a new pair to tracking schedule
     """
-    pair_info = service.add_pair(query=payload.query,
-                                 location=payload.location,
-                                 check_every_minute=payload.check_every_minute)
+    # Validate location
+    location = payload.location.title()
+    if location not in valid_locations:
+        raise HTTPException(status_code=400, detail="Invalid location")
 
+    pair_info = service.add_pair(query=payload.query,
+                                 location=location,
+                                 check_every_minute=payload.check_every_minute)
     return pair_info
 
 
@@ -31,8 +36,7 @@ def stop_tracking_pair(pair_id: UUID,
     try:
         service.stop_tracking_pair(pair_id=str(pair_id))
     except exc.PairNotFound:
-        return HTTPException(status_code=404, detail="Pair not found")
-
+        raise HTTPException(status_code=404, detail="Pair not found")
     return JSONResponse({"status": "ok"})  # todo change response
 
 

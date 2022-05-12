@@ -3,6 +3,7 @@ anyio==3.5.0
 asgiref==3.5.0
 async-timeout==4.0.2
 billiard==3.6.4.0
+cachetools==5.0.0
 celery==5.2.6
 celery-redbeat==2.0.0
 click==8.1.2
@@ -27,6 +28,7 @@ pyparsing==3.0.8
 python-dateutil==2.8.2
 pytz==2022.1
 redis==4.2.2
+requests==2.27.1
 six==1.16.0
 sniffio==1.2.0
 SQLAlchemy==1.4.36
