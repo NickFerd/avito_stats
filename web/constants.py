@@ -1,4 +1,6 @@
 """Application-wide constants
 """
 
-CHECK_EVERY = 60
+CHECK_EVERY_MINUTE = 60
+
+

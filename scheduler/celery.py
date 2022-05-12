@@ -1,10 +1,13 @@
 """Celery based tasks and application"""
+
 import os
 
 from celery import Celery
+from celery.schedules import schedule
+from redbeat import RedBeatSchedulerEntry
+
 from service.tasks import get_stats
 
-import redbeat.schedulers as sh
 
 app = Celery(__name__)
 
@@ -18,12 +21,42 @@ app.conf.update({
 })
 
 
-# @app.on_after_configure.connect
-# def setup_periodic_tasks(sender, **kwargs):
-#     sender.add_periodic_task(30, simple_task.s(), name='simple task')
-
 @app.task
 def simple_task():
     """test task"""
     get_stats()
     return True
+
+
+class RedBeatCeleryScheduler:
+    """Wrapper around redbeat-redis scheduler
+    """
+    prefix = 'redbeat:'
+
+    def __init__(self, app: Celery):
+        self.app = app
+
+    def add_task(self, task_name: str, check_every_minute: int):
+        """Update existing or add a new task to periodic schedule"""
+        check_every_seconds = check_every_minute * 60
+        interval = schedule(run_every=check_every_seconds)
+        entry = RedBeatSchedulerEntry(task_name,
+                                      'scheduler.celery.simple_task',  # fixme
+                                      interval,
+                                      app=self.app)
+        entry.save()
+        return entry
+
+    def stop_task(self, task_name: str):
+        """Delete task from periodic schedule
+        """
+        task_name = f'{self.prefix}{task_name}'
+        try:
+            entry = RedBeatSchedulerEntry.from_key(key=task_name, app=self.app)
+        except KeyError:
+            raise
+        entry.enabled = False
+        entry.save()
+        return entry
+
+

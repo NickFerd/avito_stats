@@ -1,31 +1,39 @@
 """Application routes"""
-from random import randint
 from uuid import UUID
 
-from celery.schedules import schedule
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from starlette.responses import JSONResponse
-from redbeat import RedBeatSchedulerEntry
 
-from web.api import schemas
-from scheduler import celery
+from service import exceptions as exc
+from service.stats_service import StatsService
+from web.api import schemas, deps
 
 router = APIRouter()
 
 
 @router.post('/add', response_model=schemas.GetPairSchema)
-def add_pair(payload: schemas.CreatePairSchema):
+def add_pair(payload: schemas.CreatePairSchema,
+             service: StatsService = Depends(deps.init_service)):
     """Add a new pair to tracking schedule
     """
-    print(payload)
-    print(type(payload))
+    pair_info = service.add_pair(query=payload.query,
+                                 location=payload.location,
+                                 check_every_minute=payload.check_every_minute)
+
+    return pair_info
 
 
 @router.get('/stop/{pair_id}')
-def stop_tracking_pair(pair_id: UUID):
+def stop_tracking_pair(pair_id: UUID,
+                       service: StatsService = Depends(deps.init_service)):
     """Remove pair from tracking schedule
     """
-    pass
+    try:
+        service.stop_tracking_pair(pair_id=str(pair_id))
+    except exc.PairNotFound:
+        return HTTPException(status_code=404, detail="Pair not found")
+
+    return JSONResponse({"status": "ok"})  # todo change response
 
 
 @router.post('/stat', response_model=schemas.StatsResponseSchema)
@@ -38,35 +46,4 @@ def fetch_top_ads(payload: schemas.ResultsRequestSchema):
     pass
 
 
-@router.post('/location', response_model=schemas.LocationResponseSchema)
-def fetch_location_id(payload: schemas.LocationRequestSchema):
-    pass
 
-
-@router.get('/task')
-def trigger_task():
-    task = celery.simple_task.delay()
-    return JSONResponse({"task_id": task.id})
-
-
-@router.get('/set_periodic')
-def set_periodic_task():
-    task_name = str(randint(1, 20))
-    # celery.app.conf.beat_schedule[task_name] = {
-    #     "task": 'scheduler.celery.simple_task',
-    #     'schedule': 60,
-    # }
-    # key = celery.app.add_periodic_task(schedule=30,
-    #                                    sig=celery.simple_task.s(),
-    #                                    name=task_name)
-    # print(celery.app.conf.beat_schedule)
-    interval = schedule(run_every=60)
-    entry = RedBeatSchedulerEntry(task_name,
-                                  'scheduler.celery.simple_task',
-                                  interval,
-                                  app=celery.app)
-    entry.save()
-    print(entry.next)
-    print(entry.name)
-    print(entry.enabled)
-    return JSONResponse({"task_name": task_name})

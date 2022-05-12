@@ -21,7 +21,7 @@ __all__ = [
 
 class PairItemSchema(BaseModel):
     query: str
-    location_id: int
+    location: str
 
 
 class StatItemSchema(BaseModel):
@@ -38,15 +38,12 @@ class AdItemSchema(BaseModel):
     moment: datetime
 
 
-class GetPairSchema(BaseModel):
-    id: UUID
-    last_run: datetime
-    check_every: int
-    pair: PairItemSchema
-
-
 class CreatePairSchema(PairItemSchema):
-    check_every_minute: Optional[int] = constants.CHECK_EVERY
+    check_every_minute: Optional[int] = constants.CHECK_EVERY_MINUTE
+
+
+class GetPairSchema(CreatePairSchema):
+    id: UUID
 
 
 class ResultsRequestSchema(BaseModel):
