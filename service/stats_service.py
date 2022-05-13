@@ -3,11 +3,8 @@
 """
 import uuid
 
-from sqlalchemy import select
-
-from database.models import Pair
+from database import crud
 from web.api import schemas
-from service import exceptions as exc
 
 
 class StatsService:
@@ -20,29 +17,13 @@ class StatsService:
         """Check if pair of location_id and query already exists in DB and add
         a new task if needed.
         """
-        get_pair_stmt = select(Pair).where(Pair.query == query).where(
-            Pair.location == location)
         with self.session() as session:
             with session.begin():
                 # Create or update pair in db
-                existing_pair = session.execute(get_pair_stmt).one_or_none()
-                if existing_pair:
-                    # Pair exists
-                    pair = existing_pair[0]
-                    pair.check_every_minute = check_every_minute
-                    pair.status = True
-                    pair_uuid = pair.id
-                else:
-                    # Create new pair
-                    pair_uuid = uuid.uuid4()
-
-                    pair = Pair(id=str(pair_uuid),
-                                query=query,
-                                location=location,
-                                check_every_minute=check_every_minute,
-                                status=True)
-                    session.add(pair)
-
+                pair_uuid = crud.upsert_pair(
+                    session, query=query,
+                    location=location, check_every_minute=check_every_minute
+                )
                 # Update schedule
                 self.scheduler.add_task(
                     task_name=str(pair_uuid),
@@ -54,20 +35,14 @@ class StatsService:
                                      location=location,
                                      check_every_minute=check_every_minute)
 
-    def stop_tracking_pair(self, pair_id: str) -> None:
+    def stop_tracking_pair(self, pair_id: uuid.UUID) -> None:
         """Check existence in schedule and db, then set appropriate status
         If not found - raise PairNotFound exception
         """
-        get_pair_stmt = select(Pair).where(Pair.id == pair_id)
         with self.session() as session:
             with session.begin():
-                existing_pair = session.execute(get_pair_stmt).one_or_none()
-                if not existing_pair:
-                    raise exc.PairNotFound('Pair not found')
-
-                pair = existing_pair[0]
-                pair.status = False
-                entry = self.scheduler.stop_task(task_name=pair_id)
+                crud.disable_pair(session, pair_id=pair_id)
+                self.scheduler.stop_task(task_name=pair_id)
 
     def get_count_stats(self, ):
         pass

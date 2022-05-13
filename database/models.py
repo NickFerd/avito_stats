@@ -22,7 +22,8 @@ class Pair:
 
     )
 
-    id = Column(postgresql.UUID, primary_key=True, default=uuid.uuid4)
+    id = Column(postgresql.UUID(as_uuid=True), primary_key=True,
+                default=uuid.uuid4)
     query = Column(String, nullable=False)
     location = Column(String, nullable=False)
     check_every_minute = Column(Integer, nullable=False)
