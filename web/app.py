@@ -14,5 +14,5 @@ app.include_router(router)
 @app.on_event('startup')
 def startup_callback():
     """Execute on startup"""
-    init_db()
     valid_locations()  # Preheat cache
+    init_db()

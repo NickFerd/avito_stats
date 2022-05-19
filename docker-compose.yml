@@ -30,7 +30,7 @@ services:
       - redis_data:/data
 
 
-  worker:  # celery based worker and beat scheduler
+  worker:  # celery based worker
     build: .
     command: celery --app=scheduler.celery.app worker --loglevel=info
     restart: unless-stopped
@@ -41,7 +41,7 @@ services:
       - redis
       - db
 
-  beat:
+  beat:  # custom redis based scheduler - celery beat
     build: .
     command: celery --app=scheduler.celery.app beat --max-interval=60 --loglevel=info --scheduler=redbeat.RedBeatScheduler
     restart: unless-stopped

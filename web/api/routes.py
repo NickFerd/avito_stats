@@ -17,12 +17,14 @@ def add_pair(payload: schemas.CreatePairSchema,
              valid_locations: dict = Depends(deps.valid_locations)):
     """Add a new pair to tracking schedule
     """
+    location = payload.location.lower()
+    query = payload.query.lower()
+
     # Validate location
-    location = payload.location.title()
     if location not in valid_locations:
         raise HTTPException(status_code=400, detail="Invalid location")
 
-    pair_info = service.add_pair(query=payload.query,
+    pair_info = service.add_pair(query=query,
                                  location=location,
                                  check_every_minute=payload.check_every_minute)
     return pair_info
@@ -34,10 +36,11 @@ def stop_tracking_pair(pair_id: UUID,
     """Remove pair from tracking schedule
     """
     try:
-        service.stop_tracking_pair(pair_id=str(pair_id))
+        service.stop_tracking_pair(pair_id=pair_id)
     except exc.PairNotFound:
         raise HTTPException(status_code=404, detail="Pair not found")
-    return JSONResponse({"status": "ok"})  # todo change response
+
+    return JSONResponse({"result": "success"})
 
 
 @router.post('/stat', response_model=schemas.StatsResponseSchema)

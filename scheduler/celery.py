@@ -4,34 +4,33 @@ import os
 
 from celery import Celery
 from celery.schedules import schedule
+from config import settings
+
 from redbeat import RedBeatSchedulerEntry
 
-from service.tasks import get_stats
-
+from service.tasks import etl_avito_stats
 
 app = Celery(__name__)
 
-app.conf.broker_url = os.environ.get('CELERY_BROKER_URL',
-                                     'redis://localhost:6379')
-app.conf.result_backend = os.environ.get('CELERY_BROKER_URL',
-                                         'redis://localhost:6379')
+app.conf.broker_url = settings.celery_broker_url
+app.conf.result_backend = settings.celery_broker_url
 app.conf.update({
-    'redbeat_redis_url': os.environ.get('REDBEAT_REDIS_URL',
-                                        "redis://localhost:6379/1")
+    'redbeat_redis_url': settings.redbeat_redis_url
 })
 
 
 @app.task
-def simple_task():
-    """test task"""
-    get_stats()
-    return True
+def get_stats(pair_id: str):
+    """Get stat for provided pair_id item"""
+    etl_avito_stats(pair_id)
+    return pair_id
 
 
 class RedBeatCeleryScheduler:
     """Wrapper around redbeat-redis scheduler
     """
     prefix = 'redbeat:'
+    callable = settings.task_path
 
     def __init__(self, app: Celery):
         self.app = app
@@ -41,8 +40,9 @@ class RedBeatCeleryScheduler:
         check_every_seconds = check_every_minute * 60
         interval = schedule(run_every=check_every_seconds)
         entry = RedBeatSchedulerEntry(task_name,
-                                      'scheduler.celery.simple_task',  # fixme
+                                      self.callable,
                                       interval,
+                                      kwargs={'pair_id': task_name},
                                       app=self.app)
         entry.save()
         return entry
@@ -58,5 +58,3 @@ class RedBeatCeleryScheduler:
         entry.enabled = False
         entry.save()
         return entry
-
-

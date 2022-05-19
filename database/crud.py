@@ -1,12 +1,32 @@
 """Util functions for performing CRUD operations with SQLAlchemy
 """
 import uuid
+from typing import Union
 
 from sqlalchemy import select
 
 from database.base import LocalSession
 from database.models import Pair
 from service import exceptions as exc
+
+__all__ = [
+    'get_pair_by_id',
+    'upsert_pair',
+    'disable_pair'
+]
+
+
+def get_pair_by_id(session: LocalSession,
+                   pair_id: Union[str, uuid.UUID]) -> Pair:
+    """Get pair item by id or raise PairNotFound error
+    """
+    get_pair_stmt = select(Pair).where(Pair.id == pair_id)
+
+    pair = session.execute(get_pair_stmt).scalar()
+    if not pair:
+        raise exc.PairNotFound(f'Pair with id={pair_id} not found')
+
+    return pair
 
 
 def upsert_pair(session: LocalSession, query: str, location: str,
@@ -16,10 +36,9 @@ def upsert_pair(session: LocalSession, query: str, location: str,
     get_pair_stmt = select(Pair).where(Pair.query == query).where(
         Pair.location == location)
 
-    existing_pair = session.execute(get_pair_stmt).one_or_none()
-    if existing_pair:
+    pair = session.execute(get_pair_stmt).scalar()
+    if pair:
         # Pair exists
-        pair = existing_pair[0]  # Unpacking Row object
         pair.check_every_minute = check_every_minute
         pair.status = True
         pair_uuid = pair.id
@@ -39,12 +58,6 @@ def upsert_pair(session: LocalSession, query: str, location: str,
 
 def disable_pair(session: LocalSession, pair_id: uuid.UUID):
     """Set boolean status field to False
-    If no pair exists - raise PairNotFound"""
-    get_pair_stmt = select(Pair).where(Pair.id == pair_id)
-
-    existing_pair = session.execute(get_pair_stmt).one_or_none()
-    if not existing_pair:
-        raise exc.PairNotFound('Pair not found')
-
-    pair = existing_pair[0]  # Unpacking Row object
+    """
+    pair = get_pair_by_id(session, pair_id)
     pair.status = False

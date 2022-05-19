@@ -40,4 +40,6 @@ uvicorn==0.17.6
 vine==5.0.0
 wcwidth==0.2.5
 wrapt==1.14.0
+hyper==0.7.0
+
 

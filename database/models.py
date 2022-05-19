@@ -3,13 +3,27 @@
 
 import uuid
 
-from sqlalchemy import Column, String, Boolean, Integer, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Integer,
+    String,
+    TIMESTAMP,
+    UniqueConstraint,
+    ForeignKey
+)
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import registry
 
 from database.base import engine
 
 _registry = registry()
+
+__all__ = [
+    'Pair',
+    'Stats',
+    'init_db'
+]
 
 
 @_registry.mapped
@@ -28,6 +42,22 @@ class Pair:
     location = Column(String, nullable=False)
     check_every_minute = Column(Integer, nullable=False)
     status = Column(Boolean, default=True)
+
+
+@_registry.mapped
+class Stats:
+    """Model of table containing results of tasks execution
+    """
+    __tablename__ = 'stats'
+
+    id = Column(Integer, primary_key=True)
+    pair_id = Column(postgresql.UUID(as_uuid=True), ForeignKey('pair.id'))
+    moment = Column(TIMESTAMP(timezone=True))
+    count = Column(Integer, nullable=False)
+    ads = Column(postgresql.JSONB)
+
+    def __repr__(self) -> str:
+        return f'{self.ads}'
 
 
 def init_db():

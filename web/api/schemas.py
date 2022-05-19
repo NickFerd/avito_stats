@@ -6,7 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, HttpUrl
 
-from web import constants
+from config import settings
 
 __all__ = [
     'GetPairSchema',
@@ -39,7 +39,7 @@ class AdItemSchema(BaseModel):
 
 
 class CreatePairSchema(PairItemSchema):
-    check_every_minute: Optional[int] = constants.CHECK_EVERY_MINUTE
+    check_every_minute: Optional[int] = settings.default_check_every_minute
 
 
 class GetPairSchema(CreatePairSchema):

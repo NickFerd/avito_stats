@@ -6,6 +6,10 @@ import uuid
 from database import crud
 from web.api import schemas
 
+__all__ = [
+    'StatsService'
+]
+
 
 class StatsService:
     def __init__(self, scheduler, db_session):
@@ -33,7 +37,7 @@ class StatsService:
         return schemas.GetPairSchema(id=pair_uuid,
                                      query=query,
                                      location=location,
-                                     check_every_minute=check_every_minute)
+                                     check_every_minute=check_every_minute)   # fixme change to dataclass
 
     def stop_tracking_pair(self, pair_id: uuid.UUID) -> None:
         """Check existence in schedule and db, then set appropriate status
