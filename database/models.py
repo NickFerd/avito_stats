@@ -21,7 +21,7 @@ _registry = registry()
 
 __all__ = [
     'Pair',
-    'Stats',
+    'Stat',
     'init_db'
 ]
 
@@ -45,7 +45,7 @@ class Pair:
 
 
 @_registry.mapped
-class Stats:
+class Stat:
     """Model of table containing results of tasks execution
     """
     __tablename__ = 'stats'
@@ -57,7 +57,7 @@ class Stats:
     ads = Column(postgresql.JSONB)
 
     def __repr__(self) -> str:
-        return f'{self.ads}'
+        return f'<Stat> pair_id={self.pair_id}, moment={self.moment}'
 
 
 def init_db():

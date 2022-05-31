@@ -35,7 +35,12 @@ class AdItemSchema(BaseModel):
     """Schema of one advertisement"""
     ad_id: int
     url: HttpUrl
+    title: str
+
+
+class AdList(BaseModel):
     moment: datetime
+    item: AdItemSchema
 
 
 class CreatePairSchema(PairItemSchema):
@@ -58,7 +63,7 @@ class StatsResponseSchema(ResultsRequestSchema):
 
 
 class TopAdsResponseSchema(ResultsRequestSchema):
-    top_ads: List[AdItemSchema]
+    top_ads: List[AdList]
 
 
 class LocationRequestSchema(BaseModel):

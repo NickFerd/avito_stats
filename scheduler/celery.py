@@ -1,13 +1,10 @@
 """Celery based tasks and application"""
 
-import os
-
 from celery import Celery
 from celery.schedules import schedule
-from config import settings
-
 from redbeat import RedBeatSchedulerEntry
 
+from config import settings
 from service.tasks import etl_avito_stats
 
 app = Celery(__name__)
@@ -23,7 +20,6 @@ app.conf.update({
 def get_stats(pair_id: str):
     """Get stat for provided pair_id item"""
     etl_avito_stats(pair_id)
-    return pair_id
 
 
 class RedBeatCeleryScheduler:

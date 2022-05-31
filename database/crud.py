@@ -1,12 +1,13 @@
 """Util functions for performing CRUD operations with SQLAlchemy
 """
 import uuid
+from dataclasses import asdict
 from typing import Union
 
 from sqlalchemy import select
 
 from database.base import LocalSession
-from database.models import Pair
+from database.models import Pair, Stat
 from service import exceptions as exc
 
 __all__ = [
@@ -14,6 +15,8 @@ __all__ = [
     'upsert_pair',
     'disable_pair'
 ]
+
+from service.utils import StatItem
 
 
 def get_pair_by_id(session: LocalSession,
@@ -61,3 +64,10 @@ def disable_pair(session: LocalSession, pair_id: uuid.UUID):
     """
     pair = get_pair_by_id(session, pair_id)
     pair.status = False
+
+
+def create_stat(session: LocalSession, stat_item: StatItem):
+    """Create a new stat db item
+    """
+    stat = Stat(**asdict(stat_item))
+    session.add(stat)

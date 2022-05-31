@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     # avito related
     russia_avito_id: str = '621540'
     avito_api_base_url = 'https://www.avito.ru/web/1/js/items'
+    avito_base_url = 'https://www.avito.ru'
+
+    top_ads = 5  # Number of ads to save
 
 
 settings = Settings()

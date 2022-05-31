@@ -1,5 +1,6 @@
 """Helping functions
 """
+from typing import Union, Sequence
 
 import requests
 from cachetools import cached, TTLCache
@@ -22,8 +23,7 @@ def get_valid_locations() -> dict:
     """
 
     result = dict()
-    endpoints = ['region', 'city']  # fixme city ids might incorrect
-    # due to repetition
+    endpoints = ['region', 'city']  # fixme city ids might incorrect due to repetition of cities names
     for _ in range(settings.max_retry):
         try:
             for endpoint in endpoints:
@@ -52,6 +52,13 @@ def process_locations(endpoint: str):
         result[location["name"].lower()] = location["id"]
 
     return result
+
+
+def retry_on_failure(exceptions: Union[Exception, Sequence[Exception]],
+                     max_try: int):
+    """Retry function if exception in :exceptions happens
+    """
+    pass
 
 
 if __name__ == '__main__':
