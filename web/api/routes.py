@@ -44,28 +44,30 @@ def stop_tracking_pair(pair_id: UUID,
     return JSONResponse({"result": "success"})
 
 
-@router.post('/stat', response_model=schemas.StatsResponseSchema)
+@router.post('/stats', response_model=schemas.StatsResponseSchema)
 def fetch_count_stats(payload: schemas.ResultsRequestSchema,
                       service: StatsService = Depends(deps.init_service)):
     """Get count stats for pair and period"""
-    stats = service.get_count_stats(pair_id=payload.pair_id,
-                                    datetime_from=payload.datetime_from,
-                                    datetime_to=payload.datetime_to)
+    stats = service.get_stats(pair_id=payload.pair_id,
+                              datetime_from=payload.datetime_from,
+                              datetime_to=payload.datetime_to,
+                              field='count')
     return {'pair_id': payload.pair_id,
             'datetime_from': payload.datetime_from,
             'datetime_to': payload.datetime_to,
             'stats': stats}
 
 
-@router.post('/top', response_model=schemas.TopAdsResponseSchema)
+@router.post('/top_ads', response_model=schemas.TopAdsResponseSchema)
 def fetch_top_ads(payload: schemas.ResultsRequestSchema,
                   service: StatsService = Depends(deps.init_service)):
     """Get top ads for pair and period"""
-    top_ads = service.get_top_stats(pair_id=payload.pair_id,
-                                    datetime_from=payload.datetime_from,
-                                    datetime_to=payload.datetime_to)
+    ads = service.get_stats(pair_id=payload.pair_id,
+                            datetime_from=payload.datetime_from,
+                            datetime_to=payload.datetime_to,
+                            field='ads')
 
     return {'pair_id': payload.pair_id,
             'datetime_from': payload.datetime_from,
             'datetime_to': payload.datetime_to,
-            'top_ads': top_ads}
+            'top_ads': ads}

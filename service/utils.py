@@ -33,14 +33,3 @@ class PairItem:
     location: str
     check_every_minute: int
 
-
-@dataclass
-class CountStat:
-    moment: datetime
-    count: int
-
-
-@dataclass
-class AdsStat:
-    moment: datetime
-    ads: List[AdItem]

@@ -2,11 +2,11 @@
  and schedule tasks
 """
 import uuid
-from dataclasses import asdict
 from datetime import datetime
+from typing import Literal
 
 from database import crud
-from service.utils import PairItem, CountStat, AdsStat
+from service.utils import PairItem
 
 __all__ = [
     'StatsService'
@@ -50,9 +50,10 @@ class StatsService:
                 crud.disable_pair(session, pair_id=pair_id)
                 self.scheduler.stop_task(task_name=pair_id)
 
-    def get_count_stats(self, pair_id: uuid.UUID,
-                        datetime_from: datetime, datetime_to: datetime):
-        """Get count stat for provided pair_id and period"""
+    def get_stats(self, pair_id: uuid.UUID,
+                  datetime_from: datetime, datetime_to: datetime,
+                  field: Literal['count', 'ads']):
+        """Get count or ads stat for provided pair_id and period"""
         with self.session() as session:
             with session.begin():
                 full_stats = crud.get_stats_for_pair_and_period(
@@ -63,24 +64,8 @@ class StatsService:
                 )
                 stats = []
                 for stat in full_stats:
-                    stats.append(CountStat(moment=stat.moment,
-                                           count=stat.count))
+                    _stat = {'moment': stat.moment,
+                             field: getattr(stat, field)}
+                    stats.append(_stat)
 
-        return stats
-
-    def get_top_stats(self, pair_id: uuid.UUID,
-                      datetime_from: datetime, datetime_to: datetime):
-        """Get top ads for provided pair and period"""
-        with self.session() as session:
-            with session.begin():
-                full_stats = crud.get_stats_for_pair_and_period(
-                    session,
-                    pair_id=pair_id,
-                    period_from=datetime_from,
-                    period_to=datetime_to
-                )
-                stats = []
-                for stat in full_stats:
-                    stats.append(AdsStat(moment=stat.moment,
-                                         ads=stat.ads))
         return stats
