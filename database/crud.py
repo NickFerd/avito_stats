@@ -2,7 +2,8 @@
 """
 import uuid
 from dataclasses import asdict
-from typing import Union
+from datetime import datetime
+from typing import Union, List
 
 from sqlalchemy import select
 
@@ -13,7 +14,9 @@ from service import exceptions as exc
 __all__ = [
     'get_pair_by_id',
     'upsert_pair',
-    'disable_pair'
+    'disable_pair',
+    'create_stat',
+    'get_stats_for_pair_and_period'
 ]
 
 from service.utils import StatItem
@@ -71,3 +74,16 @@ def create_stat(session: LocalSession, stat_item: StatItem):
     """
     stat = Stat(**asdict(stat_item))
     session.add(stat)
+
+
+def get_stats_for_pair_and_period(session: LocalSession, pair_id: uuid.UUID,
+                                  period_from: datetime,
+                                  period_to: datetime) -> List[Stat]:
+    """Get stat rows from db for provided pair_id"""
+    stmt = select(Stat).where(Stat.pair_id == pair_id). \
+        where(Stat.moment.between(period_from, period_to)). \
+        order_by(Stat.moment)
+
+    stats_objects = session.execute(stmt).scalars()
+
+    return stats_objects

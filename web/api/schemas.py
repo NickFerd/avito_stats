@@ -1,7 +1,7 @@
 """Request, response schemas for application endpoints
 """
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Union
 from uuid import UUID
 
 from pydantic import BaseModel, HttpUrl
@@ -14,8 +14,6 @@ __all__ = [
     'ResultsRequestSchema',
     'StatsResponseSchema',
     'TopAdsResponseSchema',
-    'LocationRequestSchema',
-    'LocationResponseSchema'
 ]
 
 
@@ -36,11 +34,12 @@ class AdItemSchema(BaseModel):
     ad_id: int
     url: HttpUrl
     title: str
+    price: Union[float, int]
 
 
 class AdList(BaseModel):
     moment: datetime
-    item: AdItemSchema
+    ads: List[AdItemSchema]
 
 
 class CreatePairSchema(PairItemSchema):
@@ -65,10 +64,3 @@ class StatsResponseSchema(ResultsRequestSchema):
 class TopAdsResponseSchema(ResultsRequestSchema):
     top_ads: List[AdList]
 
-
-class LocationRequestSchema(BaseModel):
-    location_name: str
-
-
-class LocationResponseSchema(LocationRequestSchema):
-    location_id: int

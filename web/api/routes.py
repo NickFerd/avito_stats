@@ -1,4 +1,5 @@
 """Application routes"""
+
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -44,13 +45,27 @@ def stop_tracking_pair(pair_id: UUID,
 
 
 @router.post('/stat', response_model=schemas.StatsResponseSchema)
-def fetch_count_stats(payload: schemas.ResultsRequestSchema):
-    pass
+def fetch_count_stats(payload: schemas.ResultsRequestSchema,
+                      service: StatsService = Depends(deps.init_service)):
+    """Get count stats for pair and period"""
+    stats = service.get_count_stats(pair_id=payload.pair_id,
+                                    datetime_from=payload.datetime_from,
+                                    datetime_to=payload.datetime_to)
+    return {'pair_id': payload.pair_id,
+            'datetime_from': payload.datetime_from,
+            'datetime_to': payload.datetime_to,
+            'stats': stats}
 
 
 @router.post('/top', response_model=schemas.TopAdsResponseSchema)
-def fetch_top_ads(payload: schemas.ResultsRequestSchema):
-    pass
+def fetch_top_ads(payload: schemas.ResultsRequestSchema,
+                  service: StatsService = Depends(deps.init_service)):
+    """Get top ads for pair and period"""
+    top_ads = service.get_top_stats(pair_id=payload.pair_id,
+                                    datetime_from=payload.datetime_from,
+                                    datetime_to=payload.datetime_to)
 
-
-
+    return {'pair_id': payload.pair_id,
+            'datetime_from': payload.datetime_from,
+            'datetime_to': payload.datetime_to,
+            'top_ads': top_ads}

@@ -23,3 +23,24 @@ class StatItem:
     moment: datetime
     count: int
     ads: List[AdItem]
+
+
+@dataclass
+class PairItem:
+    """Represents one pair"""
+    id: uuid.UUID
+    query: str
+    location: str
+    check_every_minute: int
+
+
+@dataclass
+class CountStat:
+    moment: datetime
+    count: int
+
+
+@dataclass
+class AdsStat:
+    moment: datetime
+    ads: List[AdItem]

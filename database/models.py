@@ -13,7 +13,7 @@ from sqlalchemy import (
     ForeignKey
 )
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.orm import registry
+from sqlalchemy.orm import registry, relationship
 
 from database.base import engine
 
@@ -42,6 +42,8 @@ class Pair:
     location = Column(String, nullable=False)
     check_every_minute = Column(Integer, nullable=False)
     status = Column(Boolean, default=True)
+
+    stats = relationship("Stat")
 
 
 @_registry.mapped
