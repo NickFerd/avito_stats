@@ -1,0 +1,22 @@
+apiVersion: 1
+
+# list of datasources that should be deleted from the database
+deleteDatasources:
+  - name: Postgres
+    orgId: 1
+
+# list of datasources that should be added on start up.
+datasources:
+  - name: Postgres
+    type: postgres
+    access: proxy
+    ordId: 1
+    url: $DB_URL
+    user: $DB_USER
+    database: avito
+    secureJsonData:
+      password: $DB_PASSWORD
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1200
+    editable: false

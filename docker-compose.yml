@@ -63,6 +63,19 @@ services:
       - redis
       - worker
 
+  grafana:
+    build: ./grafana
+    restart: unless-stopped
+    ports:
+      - 80:3000
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
 volumes:
   redis_data:
   postgres_data:
+  grafana-storage:
