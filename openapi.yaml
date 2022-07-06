@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Avito Stats API
-  description: API that allows to track amount of ads grouped by search query and region
+  description: API that allows to track amount of ads by search query and location
   version: 1.0.0
 
 servers:
@@ -25,11 +25,8 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    format: uuid  # todo update
+                $ref: '#/components/schemas/GetPairSchema
+        
         '400':
           description: Bad request
           content:
@@ -76,8 +73,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/StatsSchemaResponse'
-        '404':
-          $ref: '#/components/responses/NotFound'
         '400':
           description: Bad request
           content:
@@ -87,7 +82,7 @@ paths:
 
   /top:
     post:
-      summary: Endpoint similar to /stat but returns top 5 ads for every hour between specified datetime_from and datetime_to.
+      summary: Endpoint similar to /stat but returns top 5 ads for every hour between specified datetime_from and datetime_to (all UTC).
       requestBody:
         required: true
         content:
@@ -102,9 +97,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/TopAdsResponse'
 
-        '404':
-          $ref: '#/components/responses/NotFound'
-
         '400':
           description: Bad request
           content:
@@ -112,39 +104,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /location:
-    description: Get avito location ID by name (region name or city)
-    post:
-      description: Return location id and specified in request payload location name
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                location_name: string
-        
-      responses:
-        '200':
-          description: 'OK'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  location_id: 
-                    type: int
-                  location_name:
-                    type: string
-
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
+  
 
 components:
   responses:
@@ -159,11 +119,11 @@ components:
     Error:
       type: object
       properties:
-        error:
+        detail:
           type: string
       required:
         - error
-      additionalProperties: false
+      additionalProperties: true
 
     StatItem:
       type: object
@@ -179,30 +139,57 @@ components:
       required:
         - ad_id
         - url
-        - moment
+        - title
+        - price
       properties:
         ad_id:
           type: integer
         url:
           type: string
-        moment:
+        title:
           type: string
-          format: date-time
+        price:
+          type: integer
+          
+    AdsCollection:
+        type: object
+        required:
+          - moment
+          - ads
+        properties:
+          moment:
+            type: string
+            format: date-time
+          ads:
+            type: array
+            items:
+                $ref: '#/components/schemas/AdItem'
 
     AddScheme:
       type: object
       required:
         - query
-        - location_id
+        - location
       properties:
         query:
           type: string
-        location_id:
-          type: int
-        check_every:
+        location:
+          type: string
+        check_every_minute:
           type: int
           default: 60
-
+ 
+    GetPairSchema:
+        allOf:     # Combines the AddScheme and 
+            - $ref: '#/components/schemas/AddScheme'
+            - type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: string
+                  format: uuid
+    
     StatsSchemaRequest:
       type: object
       required:
@@ -221,31 +208,28 @@ components:
           format: date-time
 
     StatsSchemaResponse:
-      type: object
-      required:
-        - query
-        - region
-        - stats
-      properties:
-        id:
-          type: string
-          format: uuid
-        stats:
-          type: array
-          items:
-            $ref: '#/StatItem'
+        allOf:
+          - $ref: '#/components/schemas/StatsSchemaRequest'
+          - type: object
+            required:
+              - stats
+            properties:
+              stats:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StatItem'
 
     TopAdsResponse:
-      type: object
-      properties:
-        query:
-          type: string
-        region:
-          type: string
-        top_ads:
-          type: array
-          items:
-            $ref: '#/AdItem'
+        allOf:
+            - $ref: '#/components/schemas/StatsSchemaRequest'
+            - type: object
+              required:
+                - top_ads
+              properties:
+                top_ads:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AdsCollection'
              
     
          
