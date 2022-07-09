@@ -21,9 +21,15 @@ def add_pair(payload: schemas.CreatePairSchema,
     location = payload.location.lower()
     query = payload.query.lower()
 
+    check_every_minute = int(payload.check_every_minute)
+    if check_every_minute < 1:
+        raise HTTPException(status_code=400,
+                            detail='Invalid <check_every_minute> parameter')
+
     # Validate location
     if location not in valid_locations:
-        raise HTTPException(status_code=400, detail="Invalid location")
+        raise HTTPException(status_code=400,
+                            detail="Invalid <location> parameter")
 
     pair_info = service.add_pair(query=query,
                                  location=location,

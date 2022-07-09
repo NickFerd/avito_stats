@@ -12,6 +12,7 @@ servers:
 paths:
   /add:
     post:
+      operationId: addPair
       summary: adds pair of query and location_id to tracking schedule
       requestBody:
         required: true
@@ -25,8 +26,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetPairSchema
-        
+                $ref: '#/components/schemas/GetPairSchema'
+          links:
+            AddPair:
+              operationId: stopPair
+              parameters:
+                pair_id: '$response.body#/id'
+              description: >
+                The `id` value returned in the response can be used
+                as the `pair_id` parameter in `GET /stop/{pair_id}`
+
         '400':
           description: Bad request
           content:
@@ -44,6 +53,7 @@ paths:
           format: uuid
     get:
       summary: Stop tracking pair
+      operationId: stopPair
       responses:
         '200':
           description: OK
@@ -88,7 +98,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StatsSchemeRequest'
+              $ref: '#/components/schemas/StatsSchemaRequest'
       responses:
         '200':
           description: OK
@@ -104,7 +114,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  
+
 
 components:
   responses:
@@ -113,7 +123,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/schemas/Error'
+            $ref: '#/components/schemas/Error'
 
   schemas:
     Error:
@@ -150,20 +160,20 @@ components:
           type: string
         price:
           type: integer
-          
+
     AdsCollection:
-        type: object
-        required:
-          - moment
-          - ads
-        properties:
-          moment:
-            type: string
-            format: date-time
-          ads:
-            type: array
-            items:
-                $ref: '#/components/schemas/AdItem'
+      type: object
+      required:
+        - moment
+        - ads
+      properties:
+        moment:
+          type: string
+          format: date-time
+        ads:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdItem'
 
     AddScheme:
       type: object
@@ -176,20 +186,20 @@ components:
         location:
           type: string
         check_every_minute:
-          type: int
+          type: integer
           default: 60
- 
+
     GetPairSchema:
-        allOf:     # Combines the AddScheme and 
-            - $ref: '#/components/schemas/AddScheme'
-            - type: object
-              required:
-                - id
-              properties:
-                id:
-                  type: string
-                  format: uuid
-    
+      allOf:     # Combines the AddScheme and additional parameter
+        - $ref: '#/components/schemas/AddScheme'
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              format: uuid
+
     StatsSchemaRequest:
       type: object
       required:
@@ -208,28 +218,28 @@ components:
           format: date-time
 
     StatsSchemaResponse:
-        allOf:
-          - $ref: '#/components/schemas/StatsSchemaRequest'
-          - type: object
-            required:
-              - stats
-            properties:
-              stats:
-                type: array
-                items:
-                  $ref: '#/components/schemas/StatItem'
+      allOf:
+        - $ref: '#/components/schemas/StatsSchemaRequest'
+        - type: object
+          required:
+            - stats
+          properties:
+            stats:
+              type: array
+              items:
+                $ref: '#/components/schemas/StatItem'
 
     TopAdsResponse:
-        allOf:
-            - $ref: '#/components/schemas/StatsSchemaRequest'
-            - type: object
-              required:
-                - top_ads
-              properties:
-                top_ads:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/AdsCollection'
+      allOf:
+        - $ref: '#/components/schemas/StatsSchemaRequest'
+        - type: object
+          required:
+            - top_ads
+          properties:
+            top_ads:
+              type: array
+              items:
+                $ref: '#/components/schemas/AdsCollection'
              
     
          

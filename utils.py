@@ -34,7 +34,7 @@ def get_valid_locations() -> dict:
             pass
 
     # Manually add location of russia
-    russia_aliases = ['Рф', 'Россия', 'Российская федерация']
+    russia_aliases = ['рф', 'россия', 'российская федерация']
     russia_avito_id = '621540'
     result.update({alias: russia_avito_id for alias in russia_aliases})
     return result
