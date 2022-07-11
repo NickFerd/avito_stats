@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     # Cache related variables
     cache_ttl: int = 14400
-    cache_size: int = 2
+    cache_size: int = 1
 
     # web requests max tries on failures
     max_retry = 3

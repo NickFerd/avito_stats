@@ -19,7 +19,6 @@ curlify==2.2.1
 Deprecated==1.2.13
 exceptiongroup==1.0.0rc8
 fastapi==0.75.1
-flower==1.0.0
 graphql-core==3.2.1
 greenlet==1.1.2
 h11==0.13.0

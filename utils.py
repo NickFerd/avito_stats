@@ -23,7 +23,10 @@ def get_valid_locations() -> dict:
     """
 
     result = dict()
-    endpoints = ['region', 'city']  # fixme city ids might incorrect due to repetition of cities names
+    endpoints = ['region', 'city']
+    # City ids might be incorrect due to repetition of names
+    # Left as is for now (do not  know how to change behaviour simple way)
+    # todo change function process_locations
     for _ in range(settings.max_retry):
         try:
             for endpoint in endpoints:
@@ -54,14 +57,7 @@ def process_locations(endpoint: str):
     return result
 
 
-def retry_on_failure(exceptions: Union[Exception, Sequence[Exception]],
-                     max_try: int):
-    """Retry function if exception in :exceptions happens
-    """
-    pass
-
-
 if __name__ == '__main__':
     """Testing"""
     process_locations('region')
-    process_locations('endpoint')
+    process_locations('city')
