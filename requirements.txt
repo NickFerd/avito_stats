@@ -13,7 +13,6 @@ click-repl==0.2.0
 colorama==0.4.4
 Deprecated==1.2.13
 fastapi==0.75.1
-flower==1.0.0
 greenlet==1.1.2
 h11==0.13.0
 humanize==4.0.0
