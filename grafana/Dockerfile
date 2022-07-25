@@ -1,4 +1,4 @@
-# Custom Grafama image with provisioned datsources and dashboards
+# Custom Grafana image with provisioned datasources and dashboards
 
 FROM grafana/grafana-oss:8.5.0
 
